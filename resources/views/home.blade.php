@@ -45,6 +45,7 @@ th, td {
 <div class="row">
   <div class="column">
     <h2>Bank CSV</h2>
+    <h4>Match Record : {{ $match_record_count }}</h4>
     <table>
       <tr>
         <th>Transaction Reference</th>
@@ -57,11 +58,13 @@ th, td {
         </tr>
       @endforeach
     </table>
+    <h4>Unmatched Record : {{ count($csv_results) }}</h4>
   </div>
   <div class="column">
     <h2>Order Payments</h2>
+    <h4>&nbsp</h4>
     <table>
-      <tr>
+      <tr style="margin-top:20px;">
         <th>Order Id</th>
         <th>Transaction Reference</th>
         <th>Credit Amount</th>
@@ -74,6 +77,7 @@ th, td {
             </tr>
         @endforeach
     </table>
+    <h4>Unmatched Record : {{ count($order_payments) }}</h4>
   </div>
 </div>
 
