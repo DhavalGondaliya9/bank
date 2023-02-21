@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\OrderPayments;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         $order_payments = OrderPayments::get();
-        $filepath   = public_path('uploads/RHB PTBN.csv');
-        $file       = fopen($filepath, "r");
-        $importData_arr = array();
+        $filepath = public_path('uploads/RHB PTBN.csv');
+        $file = fopen($filepath, "r");
+        $importData_arr = [];
         $i = 0;
-        while (($filedata = fgetcsv($file, 1000, ",")) !== FALSE) {
+        while (($filedata = fgetcsv($file, 1000, ",")) !== false) {
             $num = count($filedata);
             if ($i == 0) {
-            $i++;
-            continue;
+                $i++;
+                continue;
             }
             // if ($i > 6 ) {
             //     break;
@@ -31,7 +32,7 @@ class HomeController extends Controller
         $match_record_count = 0;
         foreach ($importData_arr as $key => $ia) {
             foreach ($order_payments as $key2 => $op) {
-                if (trim($ia[6],"'") == $op->transaction_reference) {
+                if (trim($ia[6], "'") == $op->transaction_reference) {
                     if (str_replace(',', '', $ia[8]) == $op->amount) {
                         // $importData_arr[$key]['match'] = true;
                         unset($importData_arr[$key]);
@@ -45,8 +46,8 @@ class HomeController extends Controller
                 unset($importData_arr[$key]);
             }
         }
-        $data['csv_results']        = $importData_arr;
-        $data['order_payments']     = $order_payments;
+        $data['csv_results'] = $importData_arr;
+        $data['order_payments'] = $order_payments;
         $data['match_record_count'] = $match_record_count;
         return view('home', $data);
     }
