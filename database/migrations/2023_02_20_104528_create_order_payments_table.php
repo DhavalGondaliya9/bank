@@ -13,7 +13,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_payments', function (Blueprint $table) {
+        Schema::create('order_payments', function (Blueprint $table): void {
             $table->id();
             $table->integer('order_id');
             $table->string('transaction_reference');

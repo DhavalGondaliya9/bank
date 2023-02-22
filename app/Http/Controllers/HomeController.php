@@ -10,6 +10,7 @@ class HomeController extends Controller
 {
     public function index()
     {
+        $data = [];
         $order_payments = OrderPayments::get();
         $filepath = public_path('uploads/RHB PTBN.csv');
         $file = fopen($filepath, 'r');
@@ -19,16 +20,20 @@ class HomeController extends Controller
             $num = count($filedata);
             if ($i === 0) {
                 $i++;
+
                 continue;
             }
+
             // if ($i > 6 ) {
             //     break;
             // }
             for ($c = 0; $c < $num; $c++) {
                 $importData_arr[$i][] = $filedata[$c];
             }
+
             $i++;
         }
+
         fclose($file);
         $match_record_count = 0;
         foreach ($importData_arr as $key => $ia) {
@@ -44,13 +49,22 @@ class HomeController extends Controller
                     }
                 }
             }
-            if ($ia[6] === '' && $ia[8] === '') {
-                unset($importData_arr[$key]);
+
+            if ($ia[6] !== '') {
+                continue;
             }
+
+            if ($ia[8] !== '') {
+                continue;
+            }
+
+            unset($importData_arr[$key]);
         }
+
         $data['csv_results'] = $importData_arr;
         $data['order_payments'] = $order_payments;
         $data['match_record_count'] = $match_record_count;
+
         return view('home', $data);
     }
 }
