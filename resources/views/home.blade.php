@@ -52,14 +52,24 @@ th, td {
             @csrf
             <div class="input-group mb-3">
                 <div class="custom-file mr-3">
-                    <input type="file" accept=".csv,.xlsx,.xls" name="bank" class="custom-file-input" id="inputGroupFile01">
+                    <input type="file" name="bank" class="custom-file-input" id="inputGroupFile01">
                     <label class="custom-file-label" for="inputGroupFile01">Bank CSV</label>
                 </div>
                 <div class="custom-file">
-                    <input type="file" accept=".csv,.xlsx,.xls" name="order_payment" class="custom-file-input" id="inputGroupFile02">
+                    <input type="file" name="order_payment" class="custom-file-input" id="inputGroupFile02">
                     <label class="custom-file-label" for="inputGroupFile02">Order Payment CSV</label>
                 </div>
             </div>
+
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <div class="mt-3">
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -70,38 +80,42 @@ th, td {
 <div class="row">
   <div class="column">
     <h2>Bank CSV</h2>
-    <h4>Match Record : {{ $match_record_count }}</h4>
-    <h4>Unmatched Record : {{ count($bank) }}</h4>
+    <h4>Match Record : {{ isset($match_record_count) ? $match_record_count : 0  }}</h4>
+    <h4>Unmatched Record : {{ isset($bank) ? count($bank) : 0 }}</h4>
     <table>
       <tr>
         <th>Transaction Reference</th>
         <th>Credit</th>
       </tr>
-      @foreach ($bank as $v)
-        <tr class="{{ isset($v['match']) ? 'green-border' : 'red-border'}}">
-            <td>{{ trim($v[6],"'")  }}</td>
-            <td>{{ $v[8] }}</td>
-        </tr>
-      @endforeach
+      @if(isset($bank))
+        @foreach ($bank as $v)
+            <tr class="{{ isset($v['match']) ? 'green-border' : 'red-border'}}">
+                <td>{{ trim($v[6],"'")  }}</td>
+                <td>{{ $v[8] }}</td>
+            </tr>
+        @endforeach
+      @endif
     </table>
   </div>
   <div class="column">
     <h2>Order Payments</h2>
     <h4>&nbsp</h4>
-    <h4>Unmatched Record : {{ count($payment) }}</h4>
+    <h4>Unmatched Record : {{ isset($payment) ? count($payment) : 0 }}</h4>
     <table>
       <tr style="margin-top:20px;">
         <th>Order Id</th>
         <th>Transaction Reference</th>
         <th>Credit Amount</th>
       </tr>
-        @foreach ($payment as $op)
-            <tr class="{{ isset($op->match) ? 'green-border' : 'red-border'}}">
-                <td>{{ $op[0] }}</td>
-                <td>{{ $op[1] }}</td>
-                <td>{{ $op[2] }}</td>
-            </tr>
-        @endforeach
+        @if(isset($payment))
+            @foreach ($payment as $op)
+                <tr class="{{ isset($op->match) ? 'green-border' : 'red-border'}}">
+                    <td>{{ $op[0] }}</td>
+                    <td>{{ $op[1] }}</td>
+                    <td>{{ $op[2] }}</td>
+                </tr>
+            @endforeach
+        @endif
     </table>
   </div>
 </div>
