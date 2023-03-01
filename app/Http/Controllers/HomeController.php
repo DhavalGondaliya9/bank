@@ -19,19 +19,29 @@ class HomeController extends Controller
         $orderPaymentSession = $session->get('order_payment');
         $this->forgetSession($session);
         if ($bankSession && $orderPaymentSession) {
-            if (!file_exists('uploads/'.$bankSession) || !file_exists('uploads/'.$orderPaymentSession)) {
-                return to_route('home')->withErrors(['error' => 'File does not exit']);
+            if (! file_exists('uploads/'.$bankSession)) {
+                return to_route('home')->withErrors([
+                    'error' => 'File does not exit',
+                ]);
             }
+
+            if (! file_exists('uploads/'.$orderPaymentSession)) {
+                return to_route('home')->withErrors([
+                    'error' => 'File does not exit',
+                ]);
+            }
+
             $bankFilepath = public_path('uploads/'.$bankSession);
             $PaymentFilepath = public_path('uploads/'.$orderPaymentSession);
             $bankArr = Excel::toArray([], $bankFilepath);
             $paymentArr = Excel::toArray([], $PaymentFilepath);
-            $this->unlinkFile([$bankFilepath,$PaymentFilepath]);
+            $this->unlinkFile([$bankFilepath, $PaymentFilepath]);
             // remove first index array
             unset($bankArr[0][0]);
             unset($paymentArr[0][0]);
-            $data = $this->compareFileData($bankArr[0],$paymentArr[0]);
+            $data = $this->compareFileData($bankArr[0], $paymentArr[0]);
         }
+
         return view('home', $data);
     }
 
@@ -42,21 +52,25 @@ class HomeController extends Controller
         return to_route('home');
     }
 
-    private function forgetSession($session)
+    private function forgetSession($session): void
     {
         $session->forget('bank');
         $session->forget('order_payment');
     }
 
-    private function unlinkFile($filePath)
+    private function unlinkFile(array $filePath): void
     {
         foreach ($filePath as $path) {
             unlink($path);
         }
     }
 
-    private function compareFileData($bankArr,$paymentArr)
+    /**
+     * @return mixed[]
+     */
+    private function compareFileData($bankArr, $paymentArr): array
     {
+        $data = [];
         $matchRecordCount = 0;
             foreach ($bankArr as $key => $ia) {
                 if ($ia[6] === null || $ia[8] === null) {
@@ -76,13 +90,14 @@ class HomeController extends Controller
                     }
                 }
             }
+
             $data['bank'] = $bankArr;
             $data['payment'] = $paymentArr;
             $data['match_record_count'] = $matchRecordCount;
             return $data;
     }
 
-    private function validation($request)
+    private function validation(Request $request): void
     {
         $request->validate([
             'bank' => 'required|mimes:csv,xlsx,xls',
@@ -90,9 +105,9 @@ class HomeController extends Controller
         ]);
     }
 
-    private function fileMove($request)
+    private function fileMove(Request $request): void
     {
-        foreach ($request->file() as $key =>$file) {
+        foreach ($request->file() as $key => $file) {
             $request->session()->put($key, $file->getClientOriginalName());
             $file->move('uploads', $file->getClientOriginalName());
         }
