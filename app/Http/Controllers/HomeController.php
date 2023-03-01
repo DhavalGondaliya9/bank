@@ -4,67 +4,87 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\OrderPayments;
+// use App\Models\OrderPayments;
+use Excel;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $data = [];
-        $order_payments = OrderPayments::get();
-        $filepath = public_path('uploads/RHB PTBN.csv');
-        $file = fopen($filepath, 'r');
-        $importData_arr = [];
-        $i = 0;
-        while (($filedata = fgetcsv($file, 1000, ',')) !== false) {
-            $num = count($filedata);
-            if ($i === 0) {
-                $i++;
+        $bankArr = [];
+        $paymentArr = [];
+        $matchRecordCount = 0;
+        $bankSession = $request->session()->get('bank');
+        $orderPaymentSession = $request->session()->get('order_payment');
+        $request->session()->forget('bank');
+        $request->session()->forget('order_payment');
+        if ($bankSession && $orderPaymentSession) {
+            $bankFilepath = public_path('uploads/'.$bankSession);
+            $PaymentFilepath = public_path('uploads/'.$orderPaymentSession);
+            $bankFile = Excel::toArray([], $bankFilepath);
+            $paymentFile = Excel::toArray([], $PaymentFilepath);
+            unlink($bankFilepath);
+            unlink($PaymentFilepath);
+            $bankArr = $bankFile[0];
+            $paymentArr = $paymentFile[0];
+            unset($bankArr[0]);
+            unset($paymentArr[0]);
 
-                continue;
-            }
+            foreach ($bankArr as $key => $ia) {
+                if ($ia[6] === null || $ia[8] === null) {
+                    unset($bankArr[$key]);
+                    continue;
+                }
 
-            // if ($i > 6 ) {
-            //     break;
-            // }
-            for ($c = 0; $c < $num; $c++) {
-                $importData_arr[$i][] = $filedata[$c];
-            }
-
-            $i++;
-        }
-
-        fclose($file);
-        $match_record_count = 0;
-        foreach ($importData_arr as $key => $ia) {
-            foreach ($order_payments as $key2 => $op) {
-                if (trim($ia[6], "'") === $op->transaction_reference) {
-                    $amount = number_format((float) str_replace(',', '', $ia[8]), 2, '.', '');
-                    if ($amount === $op->amount) {
-                        // $importData_arr[$key]['match'] = true;
-                        unset($importData_arr[$key]);
-                        unset($order_payments[$key2]);
-                        $match_record_count += 1;
-                        // $order_payments[$key2]->match = true;
+                foreach ($paymentArr as $key2 => $op) {
+                    if (trim($ia[6], "'") === $op[1]) {
+                        $bankAmount = number_format((float) str_replace(',', '', (string) $ia[8]), 2, '.', '');
+                        $paymentAmount = number_format((float) str_replace(',', '', (string) $op[2]), 2, '.', '');
+                        if ($bankAmount === $paymentAmount) {
+                            unset($bankArr[$key]);
+                            unset($paymentArr[$key2]);
+                            $matchRecordCount += 1;
+                        }
                     }
                 }
             }
 
-            if ($ia[6] !== '') {
-                continue;
-            }
-
-            if ($ia[8] !== '') {
-                continue;
-            }
-
-            unset($importData_arr[$key]);
         }
 
-        $data['csv_results'] = $importData_arr;
-        $data['order_payments'] = $order_payments;
-        $data['match_record_count'] = $match_record_count;
+        $data['bank'] = $bankArr;
+        $data['payment'] = $paymentArr;
+        $data['match_record_count'] = $matchRecordCount;
 
         return view('home', $data);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'bank' => 'required|mimes:csv,xlsx,xls',
+            'order_payment' => 'required|mimes:csv,xlsx,xls',
+        ]);
+        $bankFile = $request->file('bank');
+        $orderPaymentFile = $request->file('order_payment');
+        $destinationPath = 'uploads';
+        $bankSession = $request->session()->get('bank');
+        $orderPaymentSession = $request->session()->get('order_payment');
+        if ($bankSession) {
+            unlink($destinationPath.'/'.$bankSession);
+        }
+
+        if ($orderPaymentSession) {
+            unlink($destinationPath.'/'.$orderPaymentSession);
+        }
+
+        $request->session()->put('bank', $bankFile->getClientOriginalName());
+        $request->session()->put('order_payment', $orderPaymentFile->getClientOriginalName());
+        $bankFile->move($destinationPath, $bankFile->getClientOriginalName());
+        $orderPaymentFile->move($destinationPath, $orderPaymentFile->getClientOriginalName());
+
+        return to_route('home');
     }
 }
