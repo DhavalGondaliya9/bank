@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-// use App\Models\OrderPayments;
-use Excel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class HomeController extends Controller
 {
@@ -31,15 +30,15 @@ class HomeController extends Controller
                 ]);
             }
 
-            $bankFilepath = public_path('uploads/'.$bankSession);
-            $PaymentFilepath = public_path('uploads/'.$orderPaymentSession);
-            $bankArr = Excel::toArray([], $bankFilepath);
-            $paymentArr = Excel::toArray([], $PaymentFilepath);
-            $this->unlinkFile([$bankFilepath, $PaymentFilepath]);
+            $bankFilePath = public_path('uploads/'.$bankSession);
+            $paymentFilePath = public_path('uploads/'.$orderPaymentSession);
+            $bankArray = Excel::toArray([], $bankFilePath);
+            $paymentArray = Excel::toArray([], $paymentFilePath);
+            $this->unlinkFile([$bankFilePath, $paymentFilePath]);
             // remove first index array
-            unset($bankArr[0][0]);
-            unset($paymentArr[0][0]);
-            $data = $this->compareFileData($bankArr[0], $paymentArr[0]);
+            unset($bankArray[0][0]);
+            unset($paymentArray[0][0]);
+            $data = $this->compareFileData($bankArray[0], $paymentArray[0]);
         }
 
         return view('home', $data);
@@ -49,6 +48,7 @@ class HomeController extends Controller
     {
         $this->validation($request);
         $this->fileMove($request);
+
         return to_route('home');
     }
 
@@ -72,29 +72,31 @@ class HomeController extends Controller
     {
         $data = [];
         $matchRecordCount = 0;
-            foreach ($bankArr as $key => $ia) {
-                if ($ia[6] === null || $ia[8] === null) {
-                    unset($bankArr[$key]);
-                    continue;
-                }
+        foreach ($bankArr as $key => $ia) {
+            if ($ia[6] === null || $ia[8] === null) {
+                unset($bankArr[$key]);
 
-                foreach ($paymentArr as $key2 => $op) {
-                    if (trim($ia[6], "'") === $op[1]) {
-                        $bankAmount = number_format((float) str_replace(',', '', (string) $ia[8]), 2, '.', '');
-                        $paymentAmount = number_format((float) str_replace(',', '', (string) $op[2]), 2, '.', '');
-                        if ($bankAmount === $paymentAmount) {
-                            unset($bankArr[$key]);
-                            unset($paymentArr[$key2]);
-                            $matchRecordCount += 1;
-                        }
+                continue;
+            }
+
+            foreach ($paymentArr as $key2 => $op) {
+                if (trim($ia[6], "'") === $op[1]) {
+                    $bankAmount = number_format((float) str_replace(',', '', (string) $ia[8]), 2, '.', '');
+                    $paymentAmount = number_format((float) str_replace(',', '', (string) $op[2]), 2, '.', '');
+                    if ($bankAmount === $paymentAmount) {
+                        unset($bankArr[$key]);
+                        unset($paymentArr[$key2]);
+                        $matchRecordCount += 1;
                     }
                 }
             }
+        }
 
-            $data['bank'] = $bankArr;
-            $data['payment'] = $paymentArr;
-            $data['match_record_count'] = $matchRecordCount;
-            return $data;
+        $data['bank'] = $bankArr;
+        $data['payment'] = $paymentArr;
+        $data['match_record_count'] = $matchRecordCount;
+
+        return $data;
     }
 
     private function validation(Request $request): void

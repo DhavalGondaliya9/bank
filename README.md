@@ -1,4 +1,4 @@
-# Title
+# Bank Reconciliation
 
 ### Requirements
 
@@ -12,8 +12,6 @@
 
 - Create `.env` file from the example file:
 `php -r "file_exists('.env') || copy('.env.example', '.env');"`
-
-- Setup .env variables (Especially SANCTUM_STATEFUL_DOMAINS should be set. The value should be the domain name without 'http://' and a trailing slash. And `LIST_OF_WEB_APP_URLS_AND_KEYS` should be updated in all the sites.)
 
 - Install the dependencies: `composer install`
 

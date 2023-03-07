@@ -17,5 +17,4 @@ test('it can render the store method', function (): void {
     ]);
     $response->assertSessionHasNoErrors();
     $response->assertRedirect('/');
-
 });

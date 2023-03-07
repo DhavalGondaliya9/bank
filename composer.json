@@ -10,7 +10,6 @@
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
-        "laravelcollective/html": "^6.4",
         "maatwebsite/excel": "^3.1"
     },
     "require-dev": {
@@ -52,7 +51,8 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
-        ]
+        ],
+        "code-quality": "php artisan optimize:clear && rector process --clear-cache && ecs --fix --clear-cache && pint && pest && GREEN='\\033[0;32m' && printf \"${GREEN}Congrats! All good. You can push now.\n\""
     },
     "extra": {
         "laravel": {
