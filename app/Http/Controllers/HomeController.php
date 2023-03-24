@@ -25,13 +25,13 @@ class HomeController extends Controller
         if ($bankSession && $orderPaymentSession) {
             if (! file_exists('uploads/'.$bankSession)) {
                 return to_route('home')->withErrors([
-                    'error' => 'Bank File does not exit',
+                    'bank' => 'Bank File does not exit',
                 ]);
             }
 
             if (! file_exists('uploads/'.$orderPaymentSession)) {
                 return to_route('home')->withErrors([
-                    'error' => 'Order Payment File does not exit',
+                    'order_payment' => 'Order Payment File does not exit',
                 ]);
             }
 

@@ -25,12 +25,12 @@
                         <h1 class="font-semibold text-3xl leading-none text-black mb-6">Bank CSV</h1>
                         <div class="flex">
                             <ul class="list-inside font-medium text-lg leading-none text-black mr-14">
-                                <li class="mb-3 text-red-600">Unmatched Records: {{ isset($bank) ? count($bank) : 0 }}</li>
-                                <li class="mb-3 text-green-600">Matched Records: {{ isset($match_record_count) ? $match_record_count : 0  }}</li>
+                                <li class="mb-3 text-red-600">Unmatched Records : {{ isset($bank) ? count($bank) : 0 }}</li>
+                                <li class="mb-3 text-green-600">Matched Records : {{ isset($match_record_count) ? $match_record_count : 0  }}</li>
                             </ul>
                             <ul class="list-inside font-medium text-lg leading-none text-black">
-                                <li class="mb-3 text-red-600">Unaccounted Amount: {{ isset($unaccounted_amount_bank) ? $unaccounted_amount_bank : 0 }}</li>
-                                <li class="mb-3 text-black">Total Records: {{ isset($total_record_bank) ? $total_record_bank : 0 }}</li>
+                                <li class="mb-3 text-red-600">Unaccounted Amount : {{ isset($unaccounted_amount_bank) ? $unaccounted_amount_bank : 0 }}</li>
+                                <li class="mb-3 text-black">Total Records : {{ isset($total_record_bank) ? $total_record_bank : 0 }}</li>
                             </ul>
                         </div>
                         <div class="flex flex-col mt-8">
@@ -72,12 +72,12 @@
                         <h1 class="font-semibold text-3xl leading-none text-black mb-6">Order Payments</h1>
                         <div class="flex">
                             <ul class="list-inside font-medium text-lg leading-none text-black mr-14">
-                                <li class="mb-3 text-red-600">Unmatched Records: {{ isset($payment) ? count($payment) : 0 }}</li>
-                                <li class="mb-3 text-green-600">Matched Records: {{ isset($match_record_count) ? $match_record_count : 0  }}</li>
+                                <li class="mb-3 text-red-600">Unmatched Records : {{ isset($payment) ? count($payment) : 0 }}</li>
+                                <li class="mb-3 text-green-600">Matched Records : {{ isset($match_record_count) ? $match_record_count : 0  }}</li>
                             </ul>
                             <ul class="list-inside font-medium text-lg leading-none text-black">
-                                <li class="mb-3 text-red-600">Unaccounted Amount: {{ isset($unaccounted_amount_payment) ? $unaccounted_amount_payment : 0 }}</li>
-                                <li class="mb-3 text-black">Total Records: {{ isset($total_record_payment) ? $total_record_payment : 0 }}</li>
+                                <li class="mb-3 text-red-600">Unaccounted Amount : {{ isset($unaccounted_amount_payment) ? $unaccounted_amount_payment : 0 }}</li>
+                                <li class="mb-3 text-black">Total Records : {{ isset($total_record_payment) ? $total_record_payment : 0 }}</li>
                             </ul>
                         </div>
                         <div class="flex flex-col mt-8">

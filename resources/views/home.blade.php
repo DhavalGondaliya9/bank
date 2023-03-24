@@ -35,40 +35,29 @@
                     @csrf
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-24">
                         <div class="mx-auto 2xl:mx-0 xl:mx-0 lg:mx-0 md:mx-auto sm:mx-auto">
-                            <div class="flex float-none 2xl:float-right xl:float-right lg:float-right bank-csv relative">
-                                <input class="custom-file-label font-normal text-lg leading-none text-black h-14 border rounded-lg pr-14 py-2 px-5 mr-2 focus:outline-none focus:shadow-outline placeholder-black px-2 w-48 2xl:w-64 xl:w-60 lg:w-60 md:w-60 sm:w-60" id="BankCSV" type="text" placeholder="Bank CSV" />
-                                <div class="relative bg-gray-200 font-medium text-lg leading-7 text-center text-black rounded-lg h-14 flex justify-center items-center text-center px-2 2xl:px-10 xl:px-10 lg:px-5 md:px-3 sm:px-2">
+                            <div class="grid grid-cols-2 gap-5 bank-csv relative">
+                                <input class="custom-file-label font-normal text-lg leading-none text-black h-14 border rounded-lg pr-14 py-2 px-5 mr-0 focus:outline-none focus:shadow-outline placeholder-black px-2" id="BankCSV" type="text" placeholder="Bank CSV" />
+                                <div class="relative bg-gray-200 font-medium text-lg leading-7 text-center text-black rounded-lg h-14 flex justify-center items-center text-center px-2">
                                     Browse<input class="absolute right-0 top-0 opacity-0 overflow-hidden h-14 custom-file-input" id="file" type="file" name="bank" />
                                 </div>
                             </div>
                             @error('bank')
-                            <div class="flex float-none 2xl:float-right xl:float-right lg:float-right">
-                                <div class="mt-5 text-red-700">
-                                    <span>{{ $message }}</span>
-                                </div>
-                            </div>
+                                <span class="block mt-3 text-red-700">{{ $message }}</span>
                             @enderror
 
                         </div>
                         <div class="mx-auto 2xl:mx-0 xl:mx-0 lg:mx-0 md:mx-auto sm:mx-auto">
-                            <div class="flex float-none 2xl:float-left xl:float-left lg:float-left">
-                                <input class="custom-file-label font-normal text-lg leading-none text-black h-14 border rounded-lg pr-14 py-2 px-5 mr-2 focus:outline-none focus:shadow-outline placeholder-black px-2 w-48 2xl:w-64 xl:w-60 lg:w-60 md:w-60 sm:w-60" id="OrderPaymentCSV" type="text" placeholder="Order Payment CSV" />
-                                <div class="relative bg-gray-200 font-medium text-lg leading-7 text-center text-black rounded-lg h-14 flex justify-center items-center text-center px-2 2xl:px-10 xl:px-10 lg:px-5 md:px-3 sm:px-2">
+                            <div class="grid grid-cols-2 gap-5">
+                                <input class="custom-file-label font-normal text-lg leading-none text-black h-14 border rounded-lg pr-14 py-2 px-5 mr-0 focus:outline-none focus:shadow-outline placeholder-black px-2" id="OrderPaymentCSV" type="text" placeholder="Order Payment CSV" />
+                                <div class="relative bg-gray-200 font-medium text-lg leading-7 text-center text-black rounded-lg h-14 flex justify-center items-center text-center px-2">
                                     Browse<input class="absolute right-0 top-0 opacity-0 overflow-hidden h-14 custom-file-input" id="file" type="file" name="order_payment" />
                                 </div>
                             </div>
                             @error('order_payment')
-                            <div class="flex float-none 2xl:float-left xl:float-left lg:float-left">
-                                <div class="mt-5 text-red-700">
-                                    <span>{{ $message }}</span>
-                                </div>
-                            </div>
+                                <span class="block mt-3 text-red-700">{{ $message }}</span>
                             @enderror
                         </div>
                     </div>
-                    @error('error')
-                        <h1 class="mt-6 font-semibold text-xl leading-none text-center text-red-700">{{ $message }}</h1>
-                    @enderror
                     <div class="w-full text-center mt-16">
                         <button class="h-14 py-4 px-10 bg-indigo-700 not-italic font-medium text-lg leading-none rounded-lg text-center text-white focus:outline-none focus:shadow-outline text-center">Submit</button>
                     </div>
