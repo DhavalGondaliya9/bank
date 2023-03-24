@@ -66,6 +66,9 @@
                             @enderror
                         </div>
                     </div>
+                    @error('error')
+                        <h1 class="mt-6 font-semibold text-xl leading-none text-center text-red-700">{{ $message }}</h1>
+                    @enderror
                     <div class="w-full text-center mt-16">
                         <button class="h-14 py-4 px-10 bg-indigo-700 not-italic font-medium text-lg leading-none rounded-lg text-center text-white focus:outline-none focus:shadow-outline text-center">Submit</button>
                     </div>
