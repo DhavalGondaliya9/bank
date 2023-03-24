@@ -1,0 +1,39 @@
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+.my-100 {
+    padding-top: 70px;
+    padding-bottom: 70px;
+}
+
+.mt-50 {
+    margin-top: 50px;
+}
+
+.bank-csv::after {
+    content: "";
+    position: absolute;
+    right: -50px;
+    top: 0;
+    width: 2px;
+    height: 56px;
+    background-color: #E8E8E8;
+}
+
+.table-border-1 {
+    border: 1px solid;
+    border-color: rgba(243, 244, 246);
+}
+
+@media (max-width: 1023px) {
+    .bank-csv::after {
+        right: 0;
+        left: 0;
+        top: auto;
+        bottom: -50px;
+        width: 156px;
+        height: 2px;
+        margin: 0 auto;
+    }
+}

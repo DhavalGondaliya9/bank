@@ -12,6 +12,11 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
+        return view('home');
+    }
+
+    public function list(Request $request)
+    {
         $data = [];
         $session = $request->session();
         $bankSession = $session->get('bank');
@@ -35,13 +40,13 @@ class HomeController extends Controller
             $bankArray = Excel::toArray([], $bankFilePath);
             $paymentArray = Excel::toArray([], $paymentFilePath);
             $this->unlinkFile([$bankFilePath, $paymentFilePath]);
-            // remove first index array
             unset($bankArray[0][0]);
             unset($paymentArray[0][0]);
             $data = $this->compareFileData($bankArray[0], $paymentArray[0]);
+        } else {
+            return to_route('home');
         }
-
-        return view('home', $data);
+        return view('list', $data);
     }
 
     public function store(Request $request): RedirectResponse
@@ -49,7 +54,7 @@ class HomeController extends Controller
         $this->validation($request);
         $this->fileMove($request);
 
-        return to_route('home');
+        return to_route('list');
     }
 
     private function forgetSession($session): void
@@ -73,6 +78,7 @@ class HomeController extends Controller
         $data = [];
         $matchRecordCount = 0;
         foreach ($bankArr as $key => $ia) {
+
             if ($ia[6] === null || $ia[8] === null) {
                 unset($bankArr[$key]);
 
@@ -89,12 +95,30 @@ class HomeController extends Controller
                         $matchRecordCount += 1;
                     }
                 }
+
             }
+
+        }
+
+        $unaccounted_amount_bank    = 0;
+        $unaccounted_amount_payment = 0;
+
+        foreach ($bankArr as $key => $ia) {
+            $bankAmount = number_format((float) str_replace(',', '', (string) $ia[8]), 2, '.', '');
+            $unaccounted_amount_bank += $bankAmount;
+        }
+        foreach ($paymentArr as $key2 => $op) {
+            $paymentAmount = number_format((float) str_replace(',', '', (string) $op[2]), 2, '.', '');
+            $unaccounted_amount_payment += $paymentAmount;
         }
 
         $data['bank'] = $bankArr;
         $data['payment'] = $paymentArr;
         $data['match_record_count'] = $matchRecordCount;
+        $data['total_record_bank'] = $matchRecordCount + count($bankArr);
+        $data['total_record_payment'] = $matchRecordCount + count($paymentArr);
+        $data['unaccounted_amount_bank'] = $unaccounted_amount_bank;
+        $data['unaccounted_amount_payment'] = $unaccounted_amount_payment;
 
         return $data;
     }

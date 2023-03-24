@@ -1,131 +1,82 @@
+
 <!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.3/dist/jquery.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<style>
-* {
-  box-sizing: border-box;
-}
-.green-border{
-     border: 5px solid green;
-}
-.red-border{
-     border: 5px solid red;
-}
-
-.row {
-  display: flex;
-  margin-left:-5px;
-  margin-right:-5px;
-}
-
-.column {
-  flex: 50%;
-  padding: 5px;
-}
-
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  width: 100%;
-  border: 1px solid #ddd;
-}
-
-th, td {
-  text-align: left;
-  padding: 16px;
-}
-
-/* tr:nth-child(even) {
-  background-color: #f2f2f2;
-} */
-</style>
-</head>
-<body>
-<div class="container mt-3">
-    <h2>Upload Both File</h2>
-    <div class="row mt-3">
-        <form action="{{ route('store')}}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <div class="input-group mb-3">
-                <div class="custom-file mr-3">
-                    <input type="file" name="bank" class="custom-file-input" id="inputGroupFile01">
-                    <label class="custom-file-label" for="inputGroupFile01">Bank CSV</label>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bank Reconciliation Tool</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/tailwind.min.css" />
+        <script src="js/jquery.slim.min.js"></script>
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
+    <body>
+        <section class="main my-100">
+            <div class="container mx-auto px-4">
+                <div class="title-subtitle-part">
+                    <h1 class="mb-6 font-semibold text-4xl leading-none text-center text-black">Bank Reconciliation Tool</h1>
+                    <h2 class="mb-4 font-normal text-lg leading-7 text-center text-gray-500">Are you tired of losing money from unaccounted online payments?</h2>
+                    <h2 class="mb-4 font-normal text-lg leading-7 text-center text-gray-500">
+                        Businesses like yours have thousands of online transactions every day. POS systems cannot track all of them. Who checks whether the POS revenue number matches what the bank statement says?
+                    </h2>
+                    <h2 class="mb-4 font-normal text-lg leading-7 text-center text-gray-500">Getting people to reconcile manually can be time-consuming, prone to errors, and a huge waste of resources. There's a better way...</h2>
+                    <h2 class="mb-4 font-normal text-lg leading-7 text-center text-gray-500">
+                        Try this tool instead. It offers a hassle-free solution for your business. Simply upload your bank account passbook, and our tool will compare the entries with your records in POS, identifying any discrepancies that need
+                        attention.
+                    </h2>
+                    <h2 class="mb-10 font-normal text-lg leading-7 text-center text-gray-500">
+                        Say goodbye to the tedious process of manual reconciliation and hello to accurate and efficient record keeping. Try our tool today and start saving time and money!
+                    </h2>
                 </div>
-                <div class="custom-file">
-                    <input type="file" name="order_payment" class="custom-file-input" id="inputGroupFile02">
-                    <label class="custom-file-label" for="inputGroupFile02">Order Payment CSV</label>
-                </div>
+                <form action="{{ route('store')}}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-24">
+                        <div class="mx-auto 2xl:mx-0 xl:mx-0 lg:mx-0 md:mx-auto sm:mx-auto">
+                            <div class="flex float-none 2xl:float-right xl:float-right lg:float-right bank-csv relative">
+                                <input class="custom-file-label font-normal text-lg leading-none text-black h-14 border rounded-lg pr-14 py-2 px-5 mr-2 focus:outline-none focus:shadow-outline placeholder-black px-2 w-48 2xl:w-64 xl:w-60 lg:w-60 md:w-60 sm:w-60" id="BankCSV" type="text" placeholder="Bank CSV" />
+                                <div class="relative bg-gray-200 font-medium text-lg leading-7 text-center text-black rounded-lg h-14 flex justify-center items-center text-center px-2 2xl:px-10 xl:px-10 lg:px-5 md:px-3 sm:px-2">
+                                    Browse<input class="absolute right-0 top-0 opacity-0 overflow-hidden h-14 custom-file-input" id="file" type="file" name="bank" />
+                                </div>
+                            </div>
+                            @error('bank')
+                            <div class="flex float-none 2xl:float-right xl:float-right lg:float-right">
+                                <div class="mt-5 text-red-700">
+                                    <span>{{ $message }}</span>
+                                </div>
+                            </div>
+                            @enderror
+
+                        </div>
+                        <div class="mx-auto 2xl:mx-0 xl:mx-0 lg:mx-0 md:mx-auto sm:mx-auto">
+                            <div class="flex float-none 2xl:float-left xl:float-left lg:float-left">
+                                <input class="custom-file-label font-normal text-lg leading-none text-black h-14 border rounded-lg pr-14 py-2 px-5 mr-2 focus:outline-none focus:shadow-outline placeholder-black px-2 w-48 2xl:w-64 xl:w-60 lg:w-60 md:w-60 sm:w-60" id="OrderPaymentCSV" type="text" placeholder="Order Payment CSV" />
+                                <div class="relative bg-gray-200 font-medium text-lg leading-7 text-center text-black rounded-lg h-14 flex justify-center items-center text-center px-2 2xl:px-10 xl:px-10 lg:px-5 md:px-3 sm:px-2">
+                                    Browse<input class="absolute right-0 top-0 opacity-0 overflow-hidden h-14 custom-file-input" id="file" type="file" name="order_payment" />
+                                </div>
+                            </div>
+                            @error('order_payment')
+                            <div class="flex float-none 2xl:float-left xl:float-left lg:float-left">
+                                <div class="mt-5 text-red-700">
+                                    <span>{{ $message }}</span>
+                                </div>
+                            </div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="w-full text-center mt-16">
+                        <button class="h-14 py-4 px-10 bg-indigo-700 not-italic font-medium text-lg leading-none rounded-lg text-center text-white focus:outline-none focus:shadow-outline text-center">Submit</button>
+                    </div>
+                </form>
             </div>
-
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <div class="mt-3">
-            <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
-        </form>
-    </div>
-</div>
-<div class="row">
-  <div class="column">
-    <h2>Bank CSV</h2>
-    <h4>Match Record : {{ isset($match_record_count) ? $match_record_count : 0  }}</h4>
-    <h4>Unmatched Record : {{ isset($bank) ? count($bank) : 0 }}</h4>
-    <table>
-      <tr>
-        <th>Transaction Reference</th>
-        <th>Credit</th>
-      </tr>
-      @if(isset($bank))
-        @foreach ($bank as $v)
-            <tr class="{{ isset($v['match']) ? 'green-border' : 'red-border'}}">
-                <td>{{ trim($v[6],"'")  }}</td>
-                <td>{{ $v[8] }}</td>
-            </tr>
-        @endforeach
-      @endif
-    </table>
-  </div>
-  <div class="column">
-    <h2>Order Payments</h2>
-    <h4>&nbsp</h4>
-    <h4>Unmatched Record : {{ isset($payment) ? count($payment) : 0 }}</h4>
-    <table>
-      <tr style="margin-top:20px;">
-        <th>Order Id</th>
-        <th>Transaction Reference</th>
-        <th>Credit Amount</th>
-      </tr>
-        @if(isset($payment))
-            @foreach ($payment as $op)
-                <tr class="{{ isset($op->match) ? 'green-border' : 'red-border'}}">
-                    <td>{{ $op[0] }}</td>
-                    <td>{{ $op[1] }}</td>
-                    <td>{{ $op[2] }}</td>
-                </tr>
-            @endforeach
-        @endif
-    </table>
-  </div>
-</div>
-
-<script>
-// Add the following code if you want the name of the file appear on select
-$(".custom-file-input").on("change", function() {
-  var fileName = $(this).val().split("\\").pop();
-  $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-});
-</script>
-</body>
+        </section>
+        <script>
+            $(".custom-file-input").on("change", function() {
+                var fileName = $(this).val().split("\\").pop();
+                $(this).parent().parent().find(".custom-file-label").attr('placeholder',fileName);
+            });
+        </script>
+    </body>
 </html>
