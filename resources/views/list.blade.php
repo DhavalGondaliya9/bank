@@ -17,7 +17,7 @@
             <div class="container mx-auto px-4">
                 <div class="grid grid-cols-12 mb-5">
                     <div class="col-span-12">
-                        <a class="font-medium text-md text-white bg-indigo-700 rounded-2xl text-center py-1 px-4" href="{{ route('home') }}"">Back</a>
+                        <a class="font-medium text-md text-white bg-indigo-700 rounded-2xl text-center py-1 px-4" href="{{ route('home') }}"">< Back</a>
                     </div>
                 </div>
                 <div class="grid grid-cols-12 gap-6">
@@ -26,11 +26,11 @@
                         <div class="flex">
                             <ul class="list-inside font-medium text-lg leading-none text-black mr-14">
                                 <li class="mb-3 text-red-600">Unmatched Records : {{ isset($bank) ? count($bank) : 0 }}</li>
-                                <li class="mb-3 text-green-600">Matched Records : {{ isset($match_record_count) ? $match_record_count : 0  }}</li>
+                                <li class="mb-3 text-green-600">Matched Records : {{ isset($matchRecordCount) ? $matchRecordCount : 0  }}</li>
                             </ul>
                             <ul class="list-inside font-medium text-lg leading-none text-black">
-                                <li class="mb-3 text-red-600">Unaccounted Amount : {{ isset($unaccounted_amount_bank) ? $unaccounted_amount_bank : 0 }}</li>
-                                <li class="mb-3 text-black">Total Records : {{ isset($total_record_bank) ? $total_record_bank : 0 }}</li>
+                                <li class="mb-3 text-red-600">Unaccounted Amount : {{ isset($unaccountedAmountBank) ? $unaccountedAmountBank : 0 }}</li>
+                                <li class="mb-3 text-black">Total Records : {{ isset($totalRecordBank) ? $totalRecordBank : 0 }}</li>
                             </ul>
                         </div>
                         <div class="flex flex-col mt-8">
@@ -73,11 +73,11 @@
                         <div class="flex">
                             <ul class="list-inside font-medium text-lg leading-none text-black mr-14">
                                 <li class="mb-3 text-red-600">Unmatched Records : {{ isset($payment) ? count($payment) : 0 }}</li>
-                                <li class="mb-3 text-green-600">Matched Records : {{ isset($match_record_count) ? $match_record_count : 0  }}</li>
+                                <li class="mb-3 text-green-600">Matched Records : {{ isset($matchRecordCount) ? $matchRecordCount : 0  }}</li>
                             </ul>
                             <ul class="list-inside font-medium text-lg leading-none text-black">
-                                <li class="mb-3 text-red-600">Unaccounted Amount : {{ isset($unaccounted_amount_payment) ? $unaccounted_amount_payment : 0 }}</li>
-                                <li class="mb-3 text-black">Total Records : {{ isset($total_record_payment) ? $total_record_payment : 0 }}</li>
+                                <li class="mb-3 text-red-600">Unaccounted Amount : {{ isset($unaccountedAmountPayment) ? $unaccountedAmountPayment : 0 }}</li>
+                                <li class="mb-3 text-black">Total Records : {{ isset($totalRecordPayment) ? $totalRecordPayment : 0 }}</li>
                             </ul>
                         </div>
                         <div class="flex flex-col mt-8">
