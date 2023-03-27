@@ -10,52 +10,51 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class HomeController extends Controller
 {
-    public function index(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        return view('home');
+        $request->validate([
+            'bank' => 'required|mimes:csv,xlsx,xls',
+            'order_payment' => 'required|mimes:csv,xlsx,xls',
+        ]);
+
+        $this->uploadSelectedFiles($request);
+
+        return to_route('list');
     }
 
     public function list(Request $request)
     {
-        $data = [];
         $session = $request->session();
-        $bankSession = $session->get('bank');
-        $orderPaymentSession = $session->get('order_payment');
+        $bankFile = $session->get('bank');
+        $orderPaymentsFile = $session->get('order_payment');
         $this->forgetSession($session);
-        if ($bankSession && $orderPaymentSession) {
-            if (! file_exists('uploads/'.$bankSession)) {
-                return to_route('home')->withErrors([
-                    'bank' => 'Bank File does not exit',
-                ]);
-            }
 
-            if (! file_exists('uploads/'.$orderPaymentSession)) {
-                return to_route('home')->withErrors([
-                    'order_payment' => 'Order Payment File does not exit',
-                ]);
-            }
-
-            $bankFilePath = public_path('uploads/'.$bankSession);
-            $paymentFilePath = public_path('uploads/'.$orderPaymentSession);
-            $bankArray = Excel::toArray([], $bankFilePath);
-            $paymentArray = Excel::toArray([], $paymentFilePath);
-            $this->unlinkFile([$bankFilePath, $paymentFilePath]);
-            unset($bankArray[0][0]);
-            unset($paymentArray[0][0]);
-            $data = $this->compareFileData($bankArray[0], $paymentArray[0]);
-        } else {
+        if (!$bankFile || !$orderPaymentsFile) {
             return to_route('home');
         }
 
+        if (! file_exists('uploads/'.$bankFile)) {
+            return to_route('home')->withErrors([
+                'bank' => 'Bank File does not exit',
+            ]);
+        }
+
+        if (! file_exists('uploads/'.$orderPaymentsFile)) {
+            return to_route('home')->withErrors([
+                'order_payment' => 'Order Payment File does not exit',
+            ]);
+        }
+
+        $bankFilePath = public_path('uploads/'.$bankFile);
+        $paymentFilePath = public_path('uploads/'.$orderPaymentsFile);
+        $bankArray = Excel::toArray([], $bankFilePath);
+        $paymentArray = Excel::toArray([], $paymentFilePath);
+        $this->unlinkFile([$bankFilePath, $paymentFilePath]);
+        unset($bankArray[0][0]);
+        unset($paymentArray[0][0]);
+        $data = $this->compareFileData($bankArray[0], $paymentArray[0]);
+
         return view('list', $data);
-    }
-
-    public function store(Request $request): RedirectResponse
-    {
-        $this->validation($request);
-        $this->fileMove($request);
-
-        return to_route('list');
     }
 
     private function forgetSession($session): void
@@ -79,7 +78,6 @@ class HomeController extends Controller
         $data = [];
         $matchRecordCount = 0;
         foreach ($bankArr as $key => $ia) {
-
             if ($ia[6] === null || $ia[8] === null) {
                 unset($bankArr[$key]);
 
@@ -96,9 +94,7 @@ class HomeController extends Controller
                         $matchRecordCount += 1;
                     }
                 }
-
             }
-
         }
 
         $unaccountedAmountBank = collect();
@@ -124,15 +120,7 @@ class HomeController extends Controller
         return $data;
     }
 
-    private function validation(Request $request): void
-    {
-        $request->validate([
-            'bank' => 'required|mimes:csv,xlsx,xls',
-            'order_payment' => 'required|mimes:csv,xlsx,xls',
-        ]);
-    }
-
-    private function fileMove(Request $request): void
+    private function uploadSelectedFiles(Request $request): void
     {
         foreach ($request->file() as $key => $file) {
             $request->session()->put($key, $file->getClientOriginalName());
