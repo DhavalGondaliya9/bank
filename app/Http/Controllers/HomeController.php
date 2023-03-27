@@ -101,26 +101,25 @@ class HomeController extends Controller
 
         }
 
-        $unaccounted_amount_bank = 0;
-        $unaccounted_amount_payment = 0;
-
+        $unaccountedAmountBank = collect();
+        $unaccountedAmountPayment = collect();
         foreach ($bankArr as $ia) {
             $bankAmount = number_format((float) str_replace(',', '', (string) $ia[8]), 2, '.', '');
-            $unaccounted_amount_bank += $bankAmount;
+            $unaccountedAmountBank->push($bankAmount);
         }
 
         foreach ($paymentArr as $op) {
             $paymentAmount = number_format((float) str_replace(',', '', (string) $op[2]), 2, '.', '');
-            $unaccounted_amount_payment += $paymentAmount;
+            $unaccountedAmountPayment->push($paymentAmount);
         }
 
         $data['bank'] = $bankArr;
         $data['payment'] = $paymentArr;
-        $data['match_record_count'] = $matchRecordCount;
-        $data['total_record_bank'] = $matchRecordCount + (is_countable($bankArr) ? count($bankArr) : 0);
-        $data['total_record_payment'] = $matchRecordCount + (is_countable($paymentArr) ? count($paymentArr) : 0);
-        $data['unaccounted_amount_bank'] = $unaccounted_amount_bank;
-        $data['unaccounted_amount_payment'] = $unaccounted_amount_payment;
+        $data['matchRecordCount'] = $matchRecordCount;
+        $data['totalRecordBank'] = $matchRecordCount + (is_countable($bankArr) ? count($bankArr) : 0);
+        $data['totalRecordPayment'] = $matchRecordCount + (is_countable($paymentArr) ? count($paymentArr) : 0);
+        $data['unaccountedAmountBank'] = $unaccountedAmountBank->sum();
+        $data['unaccountedAmountPayment'] = $unaccountedAmountPayment->sum();
 
         return $data;
     }
