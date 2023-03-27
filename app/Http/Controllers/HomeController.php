@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePostRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 class HomeController extends Controller
 {
-    public function store(Request $request): RedirectResponse
+    public function store(StorePostRequest $request): RedirectResponse
     {
-        $request->validate([
-            'bank' => 'required|mimes:csv,xlsx,xls',
-            'order_payment' => 'required|mimes:csv,xlsx,xls',
-        ]);
-
         $this->uploadSelectedFiles($request);
 
         return to_route('list');
@@ -28,22 +24,14 @@ class HomeController extends Controller
         $bankFile = $session->get('bank');
         $orderPaymentsFile = $session->get('order_payment');
         $this->forgetSession($session);
-
-        if (!$bankFile || !$orderPaymentsFile) {
+        if (! $bankFile) {
+            return to_route('home');
+        }
+        if (! $orderPaymentsFile) {
             return to_route('home');
         }
 
-        if (! file_exists('uploads/'.$bankFile)) {
-            return to_route('home')->withErrors([
-                'bank' => 'Bank File does not exit',
-            ]);
-        }
-
-        if (! file_exists('uploads/'.$orderPaymentsFile)) {
-            return to_route('home')->withErrors([
-                'order_payment' => 'Order Payment File does not exit',
-            ]);
-        }
+        $this->checkFilesValidity($bankFile, $orderPaymentsFile);
 
         $bankFilePath = public_path('uploads/'.$bankFile);
         $paymentFilePath = public_path('uploads/'.$orderPaymentsFile);
@@ -55,6 +43,17 @@ class HomeController extends Controller
         $data = $this->compareFileData($bankArray[0], $paymentArray[0]);
 
         return view('list', $data);
+    }
+
+    private function checkFilesValidity($bankFile, $orderPaymentsFile): void
+    {
+        if (! file_exists('uploads/'.$bankFile)) {
+            abort(403, 'Bank File not found');
+        }
+
+        if (! file_exists('uploads/'.$orderPaymentsFile)) {
+            abort(403, 'Order payment File not found');
+        }
     }
 
     private function forgetSession($session): void
@@ -73,58 +72,58 @@ class HomeController extends Controller
     /**
      * @return mixed[]
      */
-    private function compareFileData($bankArr, $paymentArr): array
+    private function compareFileData($bankArray, $paymentArray): array
     {
         $data = [];
         $matchRecordCount = 0;
-        foreach ($bankArr as $key => $ia) {
-            if ($ia[6] === null || $ia[8] === null) {
-                unset($bankArr[$key]);
+        foreach ($bankArray as $bankKey => $bankValue) {
+            if ($bankValue[6] === null || $bankValue[8] === null) {
+                unset($bankArray[$bankKey]);
 
                 continue;
             }
 
-            foreach ($paymentArr as $key2 => $op) {
-                if (trim($ia[6], "'") === $op[1]) {
-                    $bankAmount = number_format((float) str_replace(',', '', (string) $ia[8]), 2, '.', '');
-                    $paymentAmount = number_format((float) str_replace(',', '', (string) $op[2]), 2, '.', '');
-                    if ($bankAmount === $paymentAmount) {
-                        unset($bankArr[$key]);
-                        unset($paymentArr[$key2]);
-                        $matchRecordCount += 1;
-                    }
+            $bankAmount = number_format((float) str_replace(',', '', (string) $bankValue[8]), 2, '.', '');
+            $bankArray[$bankKey][8] = $bankAmount;
+            foreach ($paymentArray as $paymentKey => $paymentValue) {
+                $paymentAmount = number_format((float) str_replace(',', '', (string) $paymentValue[2]), 2, '.', '');
+                $paymentArray[$paymentKey][2] = $paymentAmount;
+                if (trim($bankValue[6], "'") === $paymentValue[1] && $bankAmount === $paymentAmount) {
+                    unset($bankArray[$bankKey]);
+                    unset($paymentArray[$paymentKey]);
+                    $matchRecordCount += 1;
                 }
             }
         }
 
-        $unaccountedAmountBank = collect();
-        $unaccountedAmountPayment = collect();
-        foreach ($bankArr as $ia) {
-            $bankAmount = number_format((float) str_replace(',', '', (string) $ia[8]), 2, '.', '');
-            $unaccountedAmountBank->push($bankAmount);
-        }
+        $bankAmountColumn = array_column($bankArray, '8');
+        $bankTotalAmount = array_sum($bankAmountColumn);
 
-        foreach ($paymentArr as $op) {
-            $paymentAmount = number_format((float) str_replace(',', '', (string) $op[2]), 2, '.', '');
-            $unaccountedAmountPayment->push($paymentAmount);
-        }
+        $paymentAmountColumn = array_column($paymentArray, '2');
+        $paymentTotalAmount = array_sum($paymentAmountColumn);
 
-        $data['bank'] = $bankArr;
-        $data['payment'] = $paymentArr;
+        $data['bank'] = $bankArray;
+        $data['payment'] = $paymentArray;
         $data['matchRecordCount'] = $matchRecordCount;
-        $data['totalRecordBank'] = $matchRecordCount + (is_countable($bankArr) ? count($bankArr) : 0);
-        $data['totalRecordPayment'] = $matchRecordCount + (is_countable($paymentArr) ? count($paymentArr) : 0);
-        $data['unaccountedAmountBank'] = $unaccountedAmountBank->sum();
-        $data['unaccountedAmountPayment'] = $unaccountedAmountPayment->sum();
+        $data['totalRecordBank'] = $matchRecordCount + (is_countable($bankArray) ? count($bankArray) : 0);
+        $data['totalRecordPayment'] = $matchRecordCount + (is_countable($paymentArray) ? count($paymentArray) : 0);
+        $data['unaccountedAmountBank'] = $bankTotalAmount;
+        $data['unaccountedAmountPayment'] = $paymentTotalAmount;
 
         return $data;
     }
 
     private function uploadSelectedFiles(Request $request): void
     {
-        foreach ($request->file() as $key => $file) {
-            $request->session()->put($key, $file->getClientOriginalName());
-            $file->move('uploads', $file->getClientOriginalName());
+        if ($request->file('bank') && $request->file('order_payment')) {
+            $bankFile = $request->file('bank');
+            $orderPayment = $request->file('order_payment');
+
+            $request->session()->put('bank', $bankFile->getClientOriginalName());
+            $bankFile->move('uploads', $bankFile->getClientOriginalName());
+
+            $request->session()->put('order_payment', $orderPayment->getClientOriginalName());
+            $orderPayment->move('uploads', $orderPayment->getClientOriginalName());
         }
     }
 }
