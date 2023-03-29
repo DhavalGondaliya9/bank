@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\RedirectHomeWithErrorException;
 use App\Http\Requests\StorePostRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,12 +25,6 @@ class HomeController extends Controller
         $bankFile = $session->get('bank');
         $orderPaymentsFile = $session->get('order_payment');
         $this->forgetSession($session);
-        if (! $bankFile) {
-            return to_route('home');
-        }
-        if (! $orderPaymentsFile) {
-            return to_route('home');
-        }
 
         $this->checkFilesValidity($bankFile, $orderPaymentsFile);
 
@@ -45,8 +40,16 @@ class HomeController extends Controller
         return view('list', $data);
     }
 
-    private function checkFilesValidity($bankFile, $orderPaymentsFile): void
+    private function checkFilesValidity($bankFile, $orderPaymentsFile)
     {
+        if (! $bankFile) {
+            throw new RedirectHomeWithErrorException();
+        }
+
+        if (! $orderPaymentsFile) {
+            throw new RedirectHomeWithErrorException();
+        }
+
         if (! file_exists('uploads/'.$bankFile)) {
             abort(403, 'Bank File not found');
         }
