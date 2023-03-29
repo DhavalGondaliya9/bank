@@ -14,7 +14,9 @@ class HomeController extends Controller
 {
     public function store(StorePostRequest $request): RedirectResponse
     {
-        $this->uploadSelectedFiles($request);
+        if ($request->file('bank') && $request->file('order_payment')) {
+            $this->uploadSelectedFiles($request);
+        }
 
         return to_route('list');
     }
@@ -30,11 +32,15 @@ class HomeController extends Controller
 
         $bankFilePath = public_path('uploads/'.$bankFile);
         $paymentFilePath = public_path('uploads/'.$orderPaymentsFile);
+
         $bankArray = Excel::toArray([], $bankFilePath);
         $paymentArray = Excel::toArray([], $paymentFilePath);
+
         $this->unlinkFile([$bankFilePath, $paymentFilePath]);
+
         unset($bankArray[0][0]);
         unset($paymentArray[0][0]);
+
         $data = $this->compareFileData($bankArray[0], $paymentArray[0]);
 
         return view('list', $data);
@@ -79,6 +85,7 @@ class HomeController extends Controller
     {
         $data = [];
         $matchRecordCount = 0;
+
         foreach ($bankArray as $bankKey => $bankValue) {
             if ($bankValue[6] === null || $bankValue[8] === null) {
                 unset($bankArray[$bankKey]);
@@ -88,6 +95,7 @@ class HomeController extends Controller
 
             $bankAmount = number_format((float) str_replace(',', '', (string) $bankValue[8]), 2, '.', '');
             $bankArray[$bankKey][8] = $bankAmount;
+
             foreach ($paymentArray as $paymentKey => $paymentValue) {
                 $paymentAmount = number_format((float) str_replace(',', '', (string) $paymentValue[2]), 2, '.', '');
                 $paymentArray[$paymentKey][2] = $paymentAmount;
@@ -118,15 +126,13 @@ class HomeController extends Controller
 
     private function uploadSelectedFiles(Request $request): void
     {
-        if ($request->file('bank') && $request->file('order_payment')) {
-            $bankFile = $request->file('bank');
-            $orderPayment = $request->file('order_payment');
+        $bankFile = $request->file('bank');
+        $orderPayment = $request->file('order_payment');
 
-            $request->session()->put('bank', $bankFile->getClientOriginalName());
-            $bankFile->move('uploads', $bankFile->getClientOriginalName());
+        $request->session()->put('bank', $bankFile->getClientOriginalName());
+        $bankFile->move('uploads', $bankFile->getClientOriginalName());
 
-            $request->session()->put('order_payment', $orderPayment->getClientOriginalName());
-            $orderPayment->move('uploads', $orderPayment->getClientOriginalName());
-        }
+        $request->session()->put('order_payment', $orderPayment->getClientOriginalName());
+        $orderPayment->move('uploads', $orderPayment->getClientOriginalName());
     }
 }
