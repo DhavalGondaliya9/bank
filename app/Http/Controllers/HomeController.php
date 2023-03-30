@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Exceptions\RedirectHomeWithErrorException;
+use App\Exports\BankRecordsExport;
+use App\Exports\OrderPaymentRecordsExport;
 use App\Http\Requests\StorePostRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,18 +16,17 @@ class HomeController extends Controller
 {
     public function store(StorePostRequest $request): RedirectResponse
     {
-        if ($request->file('bank') && $request->file('order_payment')) {
-            $this->uploadSelectedFiles($request);
-        }
-
+        $this->uploadSelectedFiles($request);
         return to_route('list');
     }
 
     public function list(Request $request)
     {
         $session = $request->session();
+
         $bankFile = $session->get('bank');
         $orderPaymentsFile = $session->get('order_payment');
+
         $this->forgetSession($session);
 
         $this->checkFilesValidity($bankFile, $orderPaymentsFile);
@@ -44,6 +45,63 @@ class HomeController extends Controller
         $data = $this->compareFileData($bankArray[0], $paymentArray[0]);
 
         return view('list', $data);
+    }
+
+    public function ignoreRecord(Request $request)
+    {
+        $type = $request->input('type');
+
+        $ignoredRecords = [];
+        $unmatchRecords = [];
+
+        if ($type == 'bank') {
+            $bankUnmatchRecord = session()->get('bankUnmatchRecord');
+
+            $bankRecordKey = array_flip($request->bankRecordKey);
+
+            $ignoredRecords = array_intersect_key($bankUnmatchRecord, $bankRecordKey);
+
+            $unmatchRecords = array_diff_key($bankUnmatchRecord, $bankRecordKey);
+
+            session()->put('bankIgnoreRecord', $ignoredRecords);
+            session()->put('bankUnmatchRecord', $unmatchRecords);
+        }
+
+        if ($type == 'order-payment') {
+            $orderPaymentUnmatchRecord = session()->get('orderPaymentUnmatchRecord');
+
+            $orderPaymentRecordKey = array_flip($request->orderPaymentRecordKey);
+
+            $ignoredRecords = array_intersect_key($orderPaymentUnmatchRecord, $orderPaymentRecordKey);
+
+            $unmatchRecords = array_diff_key($orderPaymentUnmatchRecord, $orderPaymentRecordKey);
+
+            session()->put('orderPaymentIgnoreRecord', $ignoredRecords);
+            session()->put('orderPaymentUnmatchRecord', $unmatchRecords);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function downloadBankRecords()
+    {
+        return $this->downloadRecords('bank', BankRecordsExport::class, 'bank-records.xlsx');
+    }
+
+    public function downloadOrderPaymentRecords()
+    {
+        return $this->downloadRecords('orderPayment', OrderPaymentRecordsExport::class, 'order-payment-records.xlsx');
+    }
+
+    private function downloadRecords($records, $exportClass, $fileName)
+    {
+        $data = [
+            $records . 'MatchRecord'   => session()->get($records . 'MatchRecord') ?? [],
+            $records . 'UnmatchRecord' => session()->get($records . 'UnmatchRecord') ?? [],
+            $records . 'IgnoreRecord'  => session()->get($records . 'IgnoreRecord') ?? [],
+        ];
+
+        return (new $exportClass($data))->download($fileName);
     }
 
     private function checkFilesValidity($bankFile, $orderPaymentsFile)
@@ -68,7 +126,14 @@ class HomeController extends Controller
     private function forgetSession($session): void
     {
         $session->forget('bank');
+        $session->forget('bankIgnoreRecord');
+        $session->forget('bankMatchRecord');
+        $session->forget('bankUnmatchRecord');
+
         $session->forget('order_payment');
+        $session->forget('orderPaymentIgnoreRecord');
+        $session->forget('orderPaymentMatchRecord');
+        $session->forget('orderPaymentUnmatchRecord');
     }
 
     private function unlinkFile(array $filePath): void
@@ -86,6 +151,9 @@ class HomeController extends Controller
         $data = [];
         $matchRecordCount = 0;
 
+        $bankMatchRecord = [];
+        $OrderPaymentMatchRecord = [];
+
         foreach ($bankArray as $bankKey => $bankValue) {
             if ($bankValue[6] === null || $bankValue[8] === null) {
                 unset($bankArray[$bankKey]);
@@ -99,13 +167,24 @@ class HomeController extends Controller
             foreach ($paymentArray as $paymentKey => $paymentValue) {
                 $paymentAmount = number_format((float) str_replace(',', '', (string) $paymentValue[2]), 2, '.', '');
                 $paymentArray[$paymentKey][2] = $paymentAmount;
+
                 if (trim($bankValue[6], "'") === $paymentValue[1] && $bankAmount === $paymentAmount) {
+                    $bankMatchRecord[] = $bankArray[$bankKey];
+                    $OrderPaymentMatchRecord[] = $paymentArray[$paymentKey];
+
                     unset($bankArray[$bankKey]);
                     unset($paymentArray[$paymentKey]);
+
                     $matchRecordCount += 1;
                 }
             }
         }
+
+        session()->put('bankMatchRecord', $bankMatchRecord);
+        session()->put('orderPaymentMatchRecord', $OrderPaymentMatchRecord);
+
+        session()->put('bankUnmatchRecord', $bankArray);
+        session()->put('orderPaymentUnmatchRecord', $paymentArray);
 
         $bankAmountColumn = array_column($bankArray, '8');
         $bankTotalAmount = array_sum($bankAmountColumn);
