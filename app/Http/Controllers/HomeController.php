@@ -54,7 +54,7 @@ class HomeController extends Controller
         $ignoredRecords = [];
         $unmatchRecords = [];
 
-        if ($type == 'bank') {
+        if ($type === 'bank') {
             $bankUnmatchRecord = session()->get('bankUnmatchRecord');
 
             $bankRecordKey = array_flip($request->bankRecordKey);
@@ -67,7 +67,7 @@ class HomeController extends Controller
             session()->put('bankUnmatchRecord', $unmatchRecords);
         }
 
-        if ($type == 'order-payment') {
+        if ($type === 'order-payment') {
             $orderPaymentUnmatchRecord = session()->get('orderPaymentUnmatchRecord');
 
             $orderPaymentRecordKey = array_flip($request->orderPaymentRecordKey);
@@ -80,7 +80,9 @@ class HomeController extends Controller
             session()->put('orderPaymentUnmatchRecord', $unmatchRecords);
         }
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+        ]);
     }
 
     public function downloadBankRecords()
@@ -93,12 +95,12 @@ class HomeController extends Controller
         return $this->downloadRecords('orderPayment', OrderPaymentRecordsExport::class, 'order-payment-records.xlsx');
     }
 
-    private function downloadRecords($records, $exportClass, $fileName)
+    private function downloadRecords(string $records, string $exportClass, string $fileName)
     {
         $data = [
-            $records . 'MatchRecord'   => session()->get($records . 'MatchRecord') ?? [],
+            $records . 'MatchRecord' => session()->get($records . 'MatchRecord') ?? [],
             $records . 'UnmatchRecord' => session()->get($records . 'UnmatchRecord') ?? [],
-            $records . 'IgnoreRecord'  => session()->get($records . 'IgnoreRecord') ?? [],
+            $records . 'IgnoreRecord' => session()->get($records . 'IgnoreRecord') ?? [],
         ];
 
         return (new $exportClass($data))->download($fileName);

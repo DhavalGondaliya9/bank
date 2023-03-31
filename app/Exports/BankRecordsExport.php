@@ -15,7 +15,6 @@ class BankRecordsExport implements WithMultipleSheets
     {
     }
 
-
     public function sheets(): array
     {
         return [
