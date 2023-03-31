@@ -21,4 +21,5 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('download-bank-records', 'downloadBankRecords')->name('download-bank-records');
     Route::get('download-order-payment-records', 'downloadOrderPaymentRecords')->name('download-order-payment-records');
     Route::post('ignore-record', 'ignoreRecord')->name('ignore-record');
+    Route::post('match-record', 'matchRecord')->name('match-record');
 });

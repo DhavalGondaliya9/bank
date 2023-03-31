@@ -85,6 +85,33 @@ class HomeController extends Controller
         ]);
     }
 
+    public function matchRecord(Request $request)
+    {
+        $bankUnmatchRecord = session()->get('bankUnmatchRecord');
+        $orderPaymentUnmatchRecord = session()->get('orderPaymentUnmatchRecord');
+        $bankMatchRecord = session()->get('bankMatchRecord');
+        $orderPaymentMatchRecord = session()->get('orderPaymentMatchRecord');
+
+        $orderPaymentRecordKey = array_flip($request->orderPaymentRecordKey);
+        $bankRecordKey = array_flip($request->bankRecordKey);
+
+        $orderPaymentMatched = array_intersect_key($orderPaymentUnmatchRecord, $orderPaymentRecordKey);
+        $bankMatched = array_intersect_key($bankUnmatchRecord, $bankRecordKey);
+
+        $unmatchRecordBank = array_diff_key($bankUnmatchRecord, $bankRecordKey);
+        $unmatchRecordOrderPayment = array_diff_key($orderPaymentUnmatchRecord, $orderPaymentRecordKey);
+
+        session()->put('orderPaymentUnmatchRecord', $unmatchRecordOrderPayment);
+        session()->put('bankUnmatchRecord', $unmatchRecordBank);
+        session()->put('bankMatchRecord', array_merge($bankMatchRecord, $bankMatched));
+        session()->put('orderPaymentMatchRecord', array_merge($orderPaymentMatchRecord, $orderPaymentMatched));
+
+        return response()->json([
+            'success' => true,
+        ]);
+
+    }
+
     public function downloadBankRecords()
     {
         return $this->downloadRecords('bank', BankRecordsExport::class, 'bank-records.xlsx');
@@ -127,15 +154,20 @@ class HomeController extends Controller
 
     private function forgetSession($session): void
     {
-        $session->forget('bank');
-        $session->forget('bankIgnoreRecord');
-        $session->forget('bankMatchRecord');
-        $session->forget('bankUnmatchRecord');
+        $keysToForget = [
+            'bank',
+            'bankMatchRecord',
+            'bankUnmatchRecord',
+            'bankIgnoreRecord',
+            'order_payment',
+            'orderPaymentMatchRecord',
+            'orderPaymentUnmatchRecord',
+            'orderPaymentIgnoreRecord',
+        ];
 
-        $session->forget('order_payment');
-        $session->forget('orderPaymentIgnoreRecord');
-        $session->forget('orderPaymentMatchRecord');
-        $session->forget('orderPaymentUnmatchRecord');
+        foreach ($keysToForget as $key) {
+            $session->forget($key);
+        }
     }
 
     private function unlinkFile(array $filePath): void
