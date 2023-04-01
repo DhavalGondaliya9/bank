@@ -8,7 +8,8 @@ function bank() {
 
         hideBankData() {
             let $this = this;
-
+            this.bankRecord = bankMatchRecord;
+            this.bankRecordKey = [];
             this.bankRecord.forEach(function (record, index) {
                 $this.bankRecordKey.push(record);
                 const element = document.getElementsByClassName("bank-record-hide"+record);
@@ -24,13 +25,20 @@ function bank() {
             })
             .then(response => response.json())
             .then(data => {
-                bankMatchRecord = [];
                 const element = document.getElementsByClassName("matched-button");
                 element[0].classList.add("hidden");
+                const bankUnmatchedRecordsCount = document.querySelector('.bank-unmatched-records-count');
+                const totalBankUnmatchedRecordsCount = parseInt(bankUnmatchedRecordsCount.innerHTML) - this.bankRecordKey.length;
+                bankUnmatchedRecordsCount.innerHTML = totalBankUnmatchedRecordsCount;
+                bankMatchRecord = [];
             });
 
             this.bankRecord = [];
         },
+
+        reset() {
+            this.bankRecord = bankMatchRecord;
+        }
 
     }
 }
@@ -43,7 +51,8 @@ function orderPayment() {
 
         hideOrderPaymentData() {
             let $this = this;
-
+            this.orderPaymentRecordKey = [];
+            this.orderPaymentRecord = orderPaymentMatchRecord;
             this.orderPaymentRecord.forEach(function (record, index) {
                 $this.orderPaymentRecordKey.push(record);
                 const element = document.getElementsByClassName("order-payment-record-hide" + record);
@@ -59,12 +68,20 @@ function orderPayment() {
             })
                 .then(response => response.json())
                 .then(data => {
-                    orderPaymentMatchRecord = [];
                     const element = document.getElementsByClassName("matched-button");
                     element[0].classList.add("hidden");
+
+                    const orderPaymentUnmatchedRecordsCount = document.querySelector('.order-payment-unmatched-records-count');
+                    const totalOrderPaymentUnmatchedRecordsCount = parseInt(orderPaymentUnmatchedRecordsCount.innerHTML) - this.orderPaymentRecordKey.length;
+                    orderPaymentUnmatchedRecordsCount.innerHTML = totalOrderPaymentUnmatchedRecordsCount;
+                    orderPaymentMatchRecord = [];
                 });
 
             this.orderPaymentRecord = [];
+        },
+
+        reset() {
+            this.orderPaymentRecord = orderPaymentMatchRecord;
         },
     }
 }

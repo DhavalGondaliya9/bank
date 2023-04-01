@@ -60,7 +60,7 @@
                                             @foreach ($bank as $key => $val)
                                                 <tr class="border-none bank-record-hide{{ $key }}">
                                                     <td class="px-5 py-4 whitespace-nowrap">
-                                                        <input value="{{ $key }}" x-model="bankRecord" @click="checkMatchedRecord($event,'bank')" type="checkbox">
+                                                        <input value="{{ $key }}" x-model="bankRecord" @click="checkMatchedRecord($event,'bank'),reset()" type="checkbox">
                                                     </td>
                                                     <td class="px-5 py-4 whitespace-nowrap">
                                                         <div class="flex items-center">
@@ -116,7 +116,7 @@
                                             @foreach ($payment as $key => $val)
                                                 <tr class="border-none order-payment-record-hide{{ $key }}">
                                                     <td class="px-5 py-4 whitespace-nowrap">
-                                                        <input value="{{ $key }}" @click="checkMatchedRecord($event,'orderPayment')" x-model="orderPaymentRecord" type="checkbox">
+                                                        <input value="{{ $key }}" @click="checkMatchedRecord($event,'orderPayment'),reset()" x-model="orderPaymentRecord" type="checkbox">
                                                     </td>
                                                     <td class="px-5 py-4 whitespace-nowrap">
                                                         <div class="font-medium text-base leading-none text-gray-600">{{ $val[3] }}</div>
