@@ -18,7 +18,7 @@ function bank() {
             this.bankRecord.forEach(function (record, index) {
                 bankIgnoreRecordList.push(bankUnmatchRecordList[record]);
                 $this.bankRecordKey.push(record);
-                const element = document.getElementsByClassName("bank-record-hide"+record);
+                const element = document.getElementsByClassName("bank-record-hide" + record);
                 element[0].classList.add("hidden");
             });
 
@@ -26,25 +26,26 @@ function bank() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({ bankRecordKey: this.bankRecordKey, bankIgnoreRecordList: bankIgnoreRecordList, type:'bank' })
+                body: JSON.stringify({ bankRecordKey: this.bankRecordKey, bankIgnoreRecordList: bankIgnoreRecordList, type: 'bank' })
             })
-            .then(response => response.json())
-            .then(data => {
-                const element = document.getElementsByClassName("matched-button");
-                element[0].classList.add("hidden");
+                .then(response => response.json())
+                .then(data => {
+                    const element = document.getElementsByClassName("matched-button");
+                    element[0].classList.add("hidden");
 
-                const bankUnmatchedRecordsCount = document.querySelector('.bank-unmatched-records-count');
-                const totalBankUnmatchedRecordsCount = parseInt(bankUnmatchedRecordsCount.innerHTML) - this.bankRecordKey.length;
-                bankUnmatchedRecordsCount.innerHTML = totalBankUnmatchedRecordsCount;
+                    const bankUnmatchedRecordsCount = document.querySelector('.bank-unmatched-records-count');
+                    const totalBankUnmatchedRecordsCount = parseInt(bankUnmatchedRecordsCount.innerHTML) - this.bankRecordKey.length;
+                    bankUnmatchedRecordsCount.innerHTML = totalBankUnmatchedRecordsCount;
 
-                bankMatchRecord = [];
+                    bankMatchRecord = [];
 
-                const bankIgnoreRecordsCount = document.querySelector('.bank-ignore-records-count').innerHTML;
-                document.querySelector('.bank-ignore-records-count').innerHTML = parseInt(bankIgnoreRecordsCount) + this.bankRecordKey.length;
+                    const bankIgnoreRecordsCount = document.querySelector('.bank-ignore-records-count').innerHTML;
+                    document.querySelector('.bank-ignore-records-count').innerHTML = parseInt(bankIgnoreRecordsCount) + this.bankRecordKey.length;
 
-                updateBankIgnoreList();
-            });
+                    updateBankIgnoreList();
+                });
 
             this.bankRecord = [];
         },
@@ -80,6 +81,7 @@ function orderPayment() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({ orderPaymentRecordKey: this.orderPaymentRecordKey, orderPaymentIgnoreRecordList: orderPaymentIgnoreRecordList, type: 'order-payment' })
             })
@@ -110,8 +112,8 @@ function orderPayment() {
 }
 
 const matchedRecord = async () => {
-    const [bankId] = bankMatchRecord;
-    const [orderPaymentId] = orderPaymentMatchRecord;
+    const bankId = bankMatchRecord;
+    const orderPaymentId = orderPaymentMatchRecord;
 
     const bankElement = document.querySelector(`.bank-record-hide${bankId}`);
     const orderPaymentElement = document.querySelector(`.order-payment-record-hide${orderPaymentId}`);
@@ -124,49 +126,52 @@ const matchedRecord = async () => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({ orderPaymentRecordKey: orderPaymentMatchRecord, bankRecordKey: bankMatchRecord, })
         });
 
         const { success } = await response.json();
 
-        if (success) {
-            let addbankRecord =  bankUnmatchRecordList[bankMatchRecord];
-            let orderPaymentRecord = orderPaymentUnmatchRecordList[orderPaymentMatchRecord];
-
-            bankMatchRecordList.push(addbankRecord);
-            orderPaymentMatchRecordList.push(orderPaymentRecord);
-
-            const element = document.querySelector('.matched-button');
-            element.classList.add('hidden');
-
-            document.querySelector('.bank-ignore').style.display = "none";
-            document.querySelector('.order-payment-ignore').style.display = "none";
-
-            bankMatchRecord = [];
-            orderPaymentMatchRecord = [];
-
-            bank().bankRecord = [];
-            orderPayment().orderPaymentRecord = [];
-
-            const bankMatchedRecordsCount = document.querySelector('.bank-matched-records-count');
-            const totalBankMatchedRecordsCount = parseInt(bankMatchedRecordsCount.innerHTML) + 1;
-            bankMatchedRecordsCount.innerHTML = totalBankMatchedRecordsCount;
-
-            const bankUnmatchedRecordsCount = document.querySelector('.bank-unmatched-records-count');
-            const totalBankUnmatchedRecordsCount = parseInt(bankUnmatchedRecordsCount.innerHTML) - 1;
-            bankUnmatchedRecordsCount.innerHTML = totalBankUnmatchedRecordsCount;
-
-            const orderPaymentmatchedRecordsCount = document.querySelector('.order-payment-matched-records-count');
-            const totalOrderPaymentmatchedRecordsCount = parseInt(orderPaymentmatchedRecordsCount.innerHTML) + 1;
-            orderPaymentmatchedRecordsCount.innerHTML = totalOrderPaymentmatchedRecordsCount;
-
-            const orderPaymentUnmatchedRecordsCount = document.querySelector('.order-payment-unmatched-records-count');
-            const totalOrderPaymentUnmatchedRecordsCount = parseInt(orderPaymentUnmatchedRecordsCount.innerHTML) - 1;
-            orderPaymentUnmatchedRecordsCount.innerHTML = totalOrderPaymentUnmatchedRecordsCount;
-
-            updateMatchList();
+        if (!success) {
+            return;
         }
+
+        let addbankRecord = bankUnmatchRecordList[bankMatchRecord];
+        let orderPaymentRecord = orderPaymentUnmatchRecordList[orderPaymentMatchRecord];
+
+        bankMatchRecordList.push(addbankRecord);
+        orderPaymentMatchRecordList.push(orderPaymentRecord);
+
+        const element = document.querySelector('.matched-button');
+        element.classList.add('hidden');
+
+        document.querySelector('.bank-ignore').style.display = "none";
+        document.querySelector('.order-payment-ignore').style.display = "none";
+
+        bankMatchRecord = [];
+        orderPaymentMatchRecord = [];
+
+        bank().bankRecord = [];
+        orderPayment().orderPaymentRecord = [];
+
+        const bankMatchedRecordsCount = document.querySelector('.bank-matched-records-count');
+        const totalBankMatchedRecordsCount = parseInt(bankMatchedRecordsCount.innerHTML) + 1;
+        bankMatchedRecordsCount.innerHTML = totalBankMatchedRecordsCount;
+
+        const bankUnmatchedRecordsCount = document.querySelector('.bank-unmatched-records-count');
+        const totalBankUnmatchedRecordsCount = parseInt(bankUnmatchedRecordsCount.innerHTML) - 1;
+        bankUnmatchedRecordsCount.innerHTML = totalBankUnmatchedRecordsCount;
+
+        const orderPaymentmatchedRecordsCount = document.querySelector('.order-payment-matched-records-count');
+        const totalOrderPaymentmatchedRecordsCount = parseInt(orderPaymentmatchedRecordsCount.innerHTML) + 1;
+        orderPaymentmatchedRecordsCount.innerHTML = totalOrderPaymentmatchedRecordsCount;
+
+        const orderPaymentUnmatchedRecordsCount = document.querySelector('.order-payment-unmatched-records-count');
+        const totalOrderPaymentUnmatchedRecordsCount = parseInt(orderPaymentUnmatchedRecordsCount.innerHTML) - 1;
+        orderPaymentUnmatchedRecordsCount.innerHTML = totalOrderPaymentUnmatchedRecordsCount;
+
+        updateMatchList();
     } catch (error) {
         console.error(error);
     }
@@ -237,5 +242,4 @@ const checkMatchedRecord = (event, type) => {
         document.querySelector(`.${type}-ignore`).style.display = 'block';
     }
 };
-
 
