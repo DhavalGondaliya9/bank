@@ -59,11 +59,9 @@ class HomeController extends Controller
 
             $bankRecordKey = array_flip($request->bankRecordKey);
 
-            $ignoredRecords = array_intersect_key($bankUnmatchRecord, $bankRecordKey);
-
             $unmatchRecords = array_diff_key($bankUnmatchRecord, $bankRecordKey);
 
-            session()->put('bankIgnoreRecord', $ignoredRecords);
+            session()->put('bankIgnoreRecord', $request->bankIgnoreRecordList);
             session()->put('bankUnmatchRecord', $unmatchRecords);
         }
 
@@ -72,11 +70,9 @@ class HomeController extends Controller
 
             $orderPaymentRecordKey = array_flip($request->orderPaymentRecordKey);
 
-            $ignoredRecords = array_intersect_key($orderPaymentUnmatchRecord, $orderPaymentRecordKey);
-
             $unmatchRecords = array_diff_key($orderPaymentUnmatchRecord, $orderPaymentRecordKey);
 
-            session()->put('orderPaymentIgnoreRecord', $ignoredRecords);
+            session()->put('orderPaymentIgnoreRecord', $request->orderPaymentIgnoreRecordList);
             session()->put('orderPaymentUnmatchRecord', $unmatchRecords);
         }
 
@@ -204,7 +200,7 @@ class HomeController extends Controller
 
                 if (trim($bankValue[6], "'") === $paymentValue[1] && $bankAmount === $paymentAmount) {
                     $bankMatchRecord[] = $bankArray[$bankKey];
-                    $OrderPaymentMatchRecord[] = $paymentArray[$paymentKey];
+                    $orderPaymentMatchRecord[] = $paymentArray[$paymentKey];
 
                     unset($bankArray[$bankKey]);
                     unset($paymentArray[$paymentKey]);
@@ -215,8 +211,7 @@ class HomeController extends Controller
         }
 
         session()->put('bankMatchRecord', $bankMatchRecord);
-        session()->put('orderPaymentMatchRecord', $OrderPaymentMatchRecord);
-
+        session()->put('orderPaymentMatchRecord', $orderPaymentMatchRecord);
         session()->put('bankUnmatchRecord', $bankArray);
         session()->put('orderPaymentUnmatchRecord', $paymentArray);
 
@@ -228,6 +223,8 @@ class HomeController extends Controller
 
         $data['bank'] = $bankArray;
         $data['payment'] = $paymentArray;
+        $data['bankMatchRecord'] = $bankMatchRecord;
+        $data['orderPaymentMatchRecord'] = $orderPaymentMatchRecord;
         $data['matchRecordCount'] = $matchRecordCount;
         $data['totalRecordBank'] = $matchRecordCount + (is_countable($bankArray) ? count($bankArray) : 0);
         $data['totalRecordPayment'] = $matchRecordCount + (is_countable($paymentArray) ? count($paymentArray) : 0);
