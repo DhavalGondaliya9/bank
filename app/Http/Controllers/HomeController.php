@@ -50,8 +50,6 @@ class HomeController extends Controller
     public function ignoreRecord(Request $request)
     {
         $type = $request->input('type');
-
-        $ignoredRecords = [];
         $unmatchRecords = [];
 
         if ($type === 'bank') {
@@ -93,6 +91,18 @@ class HomeController extends Controller
 
         $orderPaymentMatched = array_intersect_key($orderPaymentUnmatchRecord, $orderPaymentRecordKey);
         $bankMatched = array_intersect_key($bankUnmatchRecord, $bankRecordKey);
+        $unique = uniqid();
+        if (count($orderPaymentMatched) > 1) {
+            foreach(array_keys($orderPaymentMatched) as $key){
+                $orderPaymentMatched[$key][] = $unique;
+            }
+        }
+
+        if (count($bankMatched) > 1) {
+            foreach (array_keys($bankMatched) as $key) {
+                $bankMatched[$key][] = $unique;
+            }
+        }
 
         $unmatchRecordBank = array_diff_key($bankUnmatchRecord, $bankRecordKey);
         $unmatchRecordOrderPayment = array_diff_key($orderPaymentUnmatchRecord, $orderPaymentRecordKey);
@@ -161,8 +171,8 @@ class HomeController extends Controller
             'orderPaymentIgnoreRecord',
         ];
 
-        foreach ($keysToForget as $key) {
-            $session->forget($key);
+        foreach ($keysToForget as $keyToForget) {
+            $session->forget($keyToForget);
         }
     }
 
@@ -178,11 +188,11 @@ class HomeController extends Controller
      */
     private function compareFileData($bankArray, $paymentArray): array
     {
+        $orderPaymentMatchRecord = [];
         $data = [];
         $matchRecordCount = 0;
 
         $bankMatchRecord = [];
-        $OrderPaymentMatchRecord = [];
 
         foreach ($bankArray as $bankKey => $bankValue) {
             if ($bankValue[6] === null || $bankValue[8] === null) {

@@ -9,7 +9,7 @@ function bank() {
         bankRecord: [],
         bankRecordKey: [],
 
-        hideBankData() {
+        ignoreBankData() {
             let $this = this;
 
             this.bankRecord = bankMatchRecord;
@@ -62,7 +62,7 @@ function orderPayment() {
         orderPaymentRecord: [],
         orderPaymentRecordKey: [],
 
-        hideOrderPaymentData() {
+        ignoreOrderPaymentData() {
             let $this = this;
 
             this.orderPaymentRecordKey = [];
@@ -110,14 +110,17 @@ function orderPayment() {
 }
 
 const matchedRecord = async () => {
-    const [bankId] = bankMatchRecord;
-    const [orderPaymentId] = orderPaymentMatchRecord;
+    bankMatchRecord.forEach((value, index) => {
+        document.querySelector(`.bank-record-hide${value}`).classList.add('hidden');
 
-    const bankElement = document.querySelector(`.bank-record-hide${bankId}`);
-    const orderPaymentElement = document.querySelector(`.order-payment-record-hide${orderPaymentId}`);
+        bankMatchRecordList.push(bankUnmatchRecordList[value]);
+    });
 
-    bankElement.classList.add('hidden');
-    orderPaymentElement.classList.add('hidden');
+    orderPaymentMatchRecord.forEach((value, index) => {
+        document.querySelector(`.order-payment-record-hide${value}`).classList.add('hidden');
+
+        orderPaymentMatchRecordList.push(orderPaymentUnmatchRecordList[value]);
+    });
 
     try {
         const response = await fetch('/match-record', {
@@ -131,39 +134,28 @@ const matchedRecord = async () => {
         const { success } = await response.json();
 
         if (success) {
-            let addbankRecord =  bankUnmatchRecordList[bankMatchRecord];
-            let orderPaymentRecord = orderPaymentUnmatchRecordList[orderPaymentMatchRecord];
-
-            bankMatchRecordList.push(addbankRecord);
-            orderPaymentMatchRecordList.push(orderPaymentRecord);
-
             const element = document.querySelector('.matched-button');
             element.classList.add('hidden');
 
             document.querySelector('.bank-ignore').style.display = "none";
             document.querySelector('.order-payment-ignore').style.display = "none";
 
-            bankMatchRecord = [];
-            orderPaymentMatchRecord = [];
-
-            bank().bankRecord = [];
-            orderPayment().orderPaymentRecord = [];
-
             const bankMatchedRecordsCount = document.querySelector('.bank-matched-records-count');
-            const totalBankMatchedRecordsCount = parseInt(bankMatchedRecordsCount.innerHTML) + 1;
-            bankMatchedRecordsCount.innerHTML = totalBankMatchedRecordsCount;
+            bankMatchedRecordsCount.innerHTML = bankMatchRecordList.length;
 
             const bankUnmatchedRecordsCount = document.querySelector('.bank-unmatched-records-count');
-            const totalBankUnmatchedRecordsCount = parseInt(bankUnmatchedRecordsCount.innerHTML) - 1;
+            const totalBankUnmatchedRecordsCount = parseInt(bankUnmatchedRecordsCount.innerHTML) - bankMatchRecord.length;
             bankUnmatchedRecordsCount.innerHTML = totalBankUnmatchedRecordsCount;
 
             const orderPaymentmatchedRecordsCount = document.querySelector('.order-payment-matched-records-count');
-            const totalOrderPaymentmatchedRecordsCount = parseInt(orderPaymentmatchedRecordsCount.innerHTML) + 1;
-            orderPaymentmatchedRecordsCount.innerHTML = totalOrderPaymentmatchedRecordsCount;
+            orderPaymentmatchedRecordsCount.innerHTML = orderPaymentMatchRecordList.length;
 
             const orderPaymentUnmatchedRecordsCount = document.querySelector('.order-payment-unmatched-records-count');
-            const totalOrderPaymentUnmatchedRecordsCount = parseInt(orderPaymentUnmatchedRecordsCount.innerHTML) - 1;
+            const totalOrderPaymentUnmatchedRecordsCount = parseInt(orderPaymentUnmatchedRecordsCount.innerHTML) - orderPaymentMatchRecord.length;
             orderPaymentUnmatchedRecordsCount.innerHTML = totalOrderPaymentUnmatchedRecordsCount;
+
+            bankMatchRecord = [];
+            orderPaymentMatchRecord = [];
 
             updateMatchList();
         }
@@ -175,7 +167,7 @@ const matchedRecord = async () => {
 const updateBankIgnoreList = () => {
     let bankIgnoreList = document.getElementById("bankIgnoreRecord").innerHTML;
 
-    bankIgnoreRecordList.find((value, index) => {
+    bankIgnoreRecordList.forEach((value, index) => {
         document.getElementsByClassName("bankIgnoreRecord")[0].innerHTML += bankIgnoreList;
 
         document.querySelectorAll(".bank-ignore-date")[index].innerHTML = value[0];
@@ -188,7 +180,7 @@ const updateBankIgnoreList = () => {
 const updateOrderPaymentIgnoreList = () => {
     let orderPaymentIgnoreList = document.getElementById("orderPaymentIgnoreRecord").innerHTML;
 
-    orderPaymentIgnoreRecordList.find((value, index) => {
+    orderPaymentIgnoreRecordList.forEach((value, index) => {
         document.getElementsByClassName("orderPaymentIgnoreRecord")[0].innerHTML += orderPaymentIgnoreList;
 
         document.querySelectorAll(".order-payment-ignore-date")[index].innerHTML = value[3];
@@ -202,8 +194,7 @@ const updateOrderPaymentIgnoreList = () => {
 const updateMatchList = () => {
     document.querySelector('.bankMatchRecord').innerHTML = '';
     let bankList = document.getElementById("bankMatchRecord").innerHTML;
-
-    bankMatchRecordList.find((value, index) => {
+    bankMatchRecordList.forEach((value, index) => {
         document.getElementsByClassName("bankMatchRecord")[0].innerHTML += bankList;
 
         document.querySelectorAll(".bank-matched-date")[index].innerHTML = value[0];
@@ -214,7 +205,7 @@ const updateMatchList = () => {
     document.querySelector('.orderPaymentMatchRecord').innerHTML = '';
     let orderpaymentList = document.getElementById("orderPaymentMatchRecord").innerHTML;
 
-    orderPaymentMatchRecordList.find((value, index) => {
+    orderPaymentMatchRecordList.forEach((value, index) => {
         document.getElementsByClassName("orderPaymentMatchRecord")[0].innerHTML += orderpaymentList;
 
         document.querySelectorAll(".order-payment-matched-date")[index].innerHTML = value[3];
@@ -230,7 +221,10 @@ const checkMatchedRecord = (event, type) => {
 
     checked ? records.push(value) : records.splice(records.indexOf(value), 1);
 
-    const isMatched = bankMatchRecord.length === 1 && orderPaymentMatchRecord.length === 1;
+    let isMatched = bankMatchRecord.length === 1 && orderPaymentMatchRecord.length === 1;
+    isMatched = isMatched == true ? true : bankMatchRecord.length === 1 && orderPaymentMatchRecord.length >= 1;
+    isMatched = isMatched == true ? true : bankMatchRecord.length >= 1 && orderPaymentMatchRecord.length === 1;
+
     document.querySelector('.matched-button').classList.toggle('hidden', !isMatched);
 
     if (records.length > 0) {

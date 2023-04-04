@@ -78,7 +78,7 @@
                                 <div x-data="bank" class="col-span-12 md:col-span-6">
                                     <div class="flex flex-col mt-8">
                                         <div class="col-span-12 mb-4">
-                                            <button x-show="bankRecord.length > 0 ? true : false;" @click="hideBankData" class="font-medium text-md text-white bg-indigo-700 rounded-2xl text-center py-1 px-4 bank-ignore" style="display: none;">Ignore</button>
+                                            <button x-show="bankRecord.length > 0 ? true : false;" @click="ignoreBankData" class="font-medium text-md text-white bg-indigo-700 rounded-2xl text-center py-1 px-4 bank-ignore" style="display: none;">Ignore</button>
                                         </div>
                                         <div class="overflow-auto sm:rounded-2xl table-border-1">
                                             <table class="min-w-full divide-y divide-gray-200">
@@ -121,7 +121,7 @@
                                 <div x-data="orderPayment" class="col-span-12 md:col-span-6">
                                     <div class="flex flex-col mt-8">
                                         <div class="col-span-12 mb-4">
-                                            <button x-show="orderPaymentRecord.length > 0 ? true : false;" @click="hideOrderPaymentData" class="font-medium text-md text-white bg-indigo-700 rounded-2xl text-center py-1 px-4 order-payment-ignore" style="display: none;">Ignore</button>
+                                            <button x-show="orderPaymentRecord.length > 0 ? true : false;" @click="ignoreOrderPaymentData" class="font-medium text-md text-white bg-indigo-700 rounded-2xl text-center py-1 px-4 order-payment-ignore" style="display: none;">Ignore</button>
                                         </div>
                                         <div class="overflow-auto sm:rounded-2xl table-border-1">
                                             <table class="min-w-full divide-y divide-gray-200">
