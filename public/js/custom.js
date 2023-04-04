@@ -20,6 +20,7 @@ function bank() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({ bankRecordKey:this.bankRecordKey, type:'bank' })
             })
@@ -63,6 +64,7 @@ function orderPayment() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({ orderPaymentRecordKey: this.orderPaymentRecordKey, type: 'order-payment' })
             })
@@ -87,8 +89,8 @@ function orderPayment() {
 }
 
 const matchedRecord = async () => {
-    const [bankId] = bankMatchRecord;
-    const [orderPaymentId] = orderPaymentMatchRecord;
+    const bankId = bankMatchRecord;
+    const orderPaymentId = orderPaymentMatchRecord;
 
     const bankElement = document.querySelector(`.bank-record-hide${bankId}`);
     const orderPaymentElement = document.querySelector(`.order-payment-record-hide${orderPaymentId}`);
@@ -101,41 +103,44 @@ const matchedRecord = async () => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({ orderPaymentRecordKey: orderPaymentMatchRecord, bankRecordKey: bankMatchRecord, })
         });
 
         const { success } = await response.json();
 
-        if (success) {
-            const element = document.querySelector('.matched-button');
-            element.classList.add('hidden');
-
-            document.querySelector('.bank-ignore').style.display = "none";
-            document.querySelector('.order-payment-ignore').style.display = "none";
-
-            bankMatchRecord = [];
-            orderPaymentMatchRecord = [];
-
-            bank().bankRecord = [];
-            orderPayment().orderPaymentRecord = [];
-
-            const bankMatchedRecordsCount = document.querySelector('.bank-matched-records-count');
-            const totalBankMatchedRecordsCount = parseInt(bankMatchedRecordsCount.innerHTML) + 1;
-            bankMatchedRecordsCount.innerHTML = totalBankMatchedRecordsCount;
-
-            const bankUnmatchedRecordsCount = document.querySelector('.bank-unmatched-records-count');
-            const totalBankUnmatchedRecordsCount = parseInt(bankUnmatchedRecordsCount.innerHTML) - 1;
-            bankUnmatchedRecordsCount.innerHTML = totalBankUnmatchedRecordsCount;
-
-            const orderPaymentmatchedRecordsCount = document.querySelector('.order-payment-matched-records-count');
-            const totalOrderPaymentmatchedRecordsCount = parseInt(orderPaymentmatchedRecordsCount.innerHTML) + 1;
-            orderPaymentmatchedRecordsCount.innerHTML = totalOrderPaymentmatchedRecordsCount;
-
-            const orderPaymentUnmatchedRecordsCount = document.querySelector('.order-payment-unmatched-records-count');
-            const totalOrderPaymentUnmatchedRecordsCount = parseInt(orderPaymentUnmatchedRecordsCount.innerHTML) - 1;
-            orderPaymentUnmatchedRecordsCount.innerHTML = totalOrderPaymentUnmatchedRecordsCount;
+        if (!success) {
+            return;
         }
+
+        const element = document.querySelector('.matched-button');
+        element.classList.add('hidden');
+
+        document.querySelector('.bank-ignore').style.display = "none";
+        document.querySelector('.order-payment-ignore').style.display = "none";
+
+        bankMatchRecord = [];
+        orderPaymentMatchRecord = [];
+
+        bank().bankRecord = [];
+        orderPayment().orderPaymentRecord = [];
+
+        const bankMatchedRecordsCount = document.querySelector('.bank-matched-records-count');
+        const totalBankMatchedRecordsCount = parseInt(bankMatchedRecordsCount.innerHTML) + 1;
+        bankMatchedRecordsCount.innerHTML = totalBankMatchedRecordsCount;
+
+        const bankUnmatchedRecordsCount = document.querySelector('.bank-unmatched-records-count');
+        const totalBankUnmatchedRecordsCount = parseInt(bankUnmatchedRecordsCount.innerHTML) - 1;
+        bankUnmatchedRecordsCount.innerHTML = totalBankUnmatchedRecordsCount;
+
+        const orderPaymentmatchedRecordsCount = document.querySelector('.order-payment-matched-records-count');
+        const totalOrderPaymentmatchedRecordsCount = parseInt(orderPaymentmatchedRecordsCount.innerHTML) + 1;
+        orderPaymentmatchedRecordsCount.innerHTML = totalOrderPaymentmatchedRecordsCount;
+
+        const orderPaymentUnmatchedRecordsCount = document.querySelector('.order-payment-unmatched-records-count');
+        const totalOrderPaymentUnmatchedRecordsCount = parseInt(orderPaymentUnmatchedRecordsCount.innerHTML) - 1;
+        orderPaymentUnmatchedRecordsCount.innerHTML = totalOrderPaymentUnmatchedRecordsCount;
     } catch (error) {
         console.error(error);
     }
